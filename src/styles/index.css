@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+/* Design tokens: dark, high-contrast look with a lime accent (inspired by SourceFuse's brand: black, white, lime #9AC73E).
+   Token names describe roles, so the palette can be changed here in one place. */
+@theme {
+  --color-paper: #0b0c0d;        /* page background */
+  --color-mist: #15171a;         /* raised panels */
+  --color-ink: #f2f4f5;          /* body text */
+  --color-ink-soft: #a9afb6;     /* secondary text */
+  --color-rule: #2b2f34;         /* borders and dividers */
+  --color-accent: #9ac73e;       /* lime: headings, buttons, highlights */
+  --color-accent-strong: #b6de63;/* lime, hover */
+  --color-on-accent: #0b0c0d;    /* text on lime buttons */
+  --color-link: #8cc8f0;         /* links and project titles */
+  --color-meta: #8fb0c9;         /* detail lines under titles */
+  --color-pass: #9ac73e;         /* "passed" results */
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Outfit", "Manrope", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html { color: var(--color-ink); background: var(--color-paper); color-scheme: dark; -webkit-text-size-adjust: 100%; }
+  body { font-family: var(--font-sans); line-height: 1.6; overflow-x: clip; }
+  html { overflow-x: clip; }
+  a { color: var(--color-link); text-underline-offset: 3px; }
+  a:hover { color: var(--color-accent-strong); }
+  :focus-visible { outline: 3px solid var(--color-link); outline-offset: 2px; border-radius: 2px; }
+  h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; letter-spacing: -0.01em; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  ::selection { background: #9ac73e; color: #0b0c0d; }
+}
+
+/* Set outside @layer and with extra specificity, so a page that embeds this site
+   (or a browser extension) cannot turn the text dark on the dark background. */
+html body { color: var(--color-ink); background-color: var(--color-paper); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Native <dialog> used for project details */
+dialog::backdrop { background: rgb(0 0 0 / 0.7); backdrop-filter: blur(3px); }
+dialog[open] { animation: dialog-in 160ms ease-out; }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Motion (all of it is skipped when the visitor prefers reduced motion) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* Scroll reveal: only hidden when JavaScript is running, so content never disappears */
+  .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); transition-delay: var(--d, 0ms); }
+  .js .reveal.in { opacity: 1; transform: none; }
+
+  /* Page change: old page fades out, new page rises in */
+  ::view-transition-old(root) { animation: vt-out .18s ease-in both; }
+  ::view-transition-new(root) { animation: vt-in .32s cubic-bezier(.2,.7,.2,1) both; }
+  /* Project rows glide to their new position when filters change */
+  ::view-transition-group(*) { animation-duration: .35s; animation-timing-function: cubic-bezier(.2,.7,.2,1); }
+}
+@keyframes vt-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(10px); } }
+
+/* Header gains a soft shadow once the page is scrolled */
+.site-header { transition: box-shadow .25s ease, background-color .25s ease; }
+.site-header.scrolled { box-shadow: 0 10px 24px -16px rgb(0 0 0 / .9); background-color: rgb(11 12 13 / .82); backdrop-filter: blur(8px); }
+
+/* Nav: underline grows from the left on hover and for the current page */
+.nav-link { position: relative; }
+.nav-link::after { content: ""; position: absolute; left: .75rem; right: .75rem; bottom: .2rem; height: 2px; background: var(--color-accent); transform: scaleX(0); transform-origin: left; transition: transform .25s ease; }
+.nav-link:hover::after, .nav-link.active::after { transform: scaleX(1); }
+
+/* Buttons press in slightly */
+.btn { transition: transform .12s ease, background-color .2s ease, box-shadow .2s ease; }
+.btn:hover { box-shadow: 0 8px 24px -8px rgb(154 199 62 / .55); }
+.btn:active { transform: translateY(1px) scale(.98); }
+
+/* Project rows: accent bar slides in on the left on hover or keyboard focus */
+.row-hover { position: relative; transition: background-color .2s ease; }
+.row-hover::before { content: ""; position: absolute; left: -1rem; top: 1rem; bottom: 1rem; width: 3px; background: var(--color-accent); transform: scaleY(0); transition: transform .25s ease; border-radius: 2px; }
+.row-hover:hover::before, .row-hover:focus-within::before { transform: scaleY(1); }
+
+/* Badges and logos lift on hover */
+.lift { transition: transform .25s cubic-bezier(.2,.7,.2,1), filter .25s ease; }
+.lift:hover { transform: translateY(-4px); filter: drop-shadow(0 10px 14px rgb(154 199 62 / .25)); }
+
+/* Experience timeline: the line draws downwards, dots pop in */
+.timeline { position: relative; }
+.timeline::before { content: ""; position: absolute; left: 5px; top: .6rem; bottom: .6rem; width: 2px; background: var(--color-rule); transform-origin: top; }
+.timeline-dot { position: absolute; left: 0; top: .45rem; width: 12px; height: 12px; border-radius: 9999px; background: var(--color-paper); border: 3px solid var(--color-accent); }
+@media (prefers-reduced-motion: no-preference) {
+  .js .timeline::before { transform: scaleY(0); transition: transform 1.4s cubic-bezier(.4,.1,.2,1); }
+  .js .timeline.in::before { transform: scaleY(1); }
+  .js .timeline-dot { transform: scale(0); transition: transform .4s cubic-bezier(.3,1.6,.5,1); transition-delay: var(--d, 0ms); }
+  .js .reveal.in .timeline-dot { transform: scale(1); }
+}
+
+/* Hero test-run console */
+.run-line { transition: opacity .25s ease, transform .25s ease; }
+.run-line.pending { opacity: .0; transform: translateX(-6px); }
+.run-bar { transition: width 1.6s cubic-bezier(.6,.05,.2,1); }
+.caret { display: inline-block; width: .55em; height: 1em; vertical-align: -0.15em; background: currentColor; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .run-line.pending { opacity: 1; transform: none; }
+  .caret { animation: none; }
+}
+
+/* Home hero: text and console rise in on first load */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-in { animation: hero-rise .8s cubic-bezier(.2,.7,.2,1) both; }
+  .hero-in-2 { animation-delay: .15s; }
+}
+@keyframes hero-rise { from { opacity: 0; transform: translateY(14px); } }
+
+/* Arrow on call-to-action buttons slides right on hover */
+.cta-arrow { display: inline-block; transition: transform .25s cubic-bezier(.2,.7,.2,1); }
+.btn:hover .cta-arrow, a:hover > .cta-arrow { transform: translateX(4px); }
+
+/* Portrait: lime ring with a slow glow */
+.portrait { box-shadow: 0 0 0 3px var(--color-paper), 0 0 0 5px var(--color-accent), 0 18px 40px -14px rgb(154 199 62 / .45); }
+@media (prefers-reduced-motion: no-preference) {
+  .portrait { animation: portrait-pulse 4.5s ease-in-out infinite alternate; }
+}
+@keyframes portrait-pulse { to { box-shadow: 0 0 0 3px var(--color-paper), 0 0 0 5px var(--color-accent-strong), 0 22px 52px -12px rgb(154 199 62 / .6); } }
+
+/* "Open to work" dot pulses gently */
+@media (prefers-reduced-motion: no-preference) {
+  .open-dot { animation: open-pulse 2s ease-out infinite; }
+}
+@keyframes open-pulse { 0% { box-shadow: 0 0 0 0 rgb(154 199 62 / .7); } 100% { box-shadow: 0 0 0 8px rgb(154 199 62 / 0); } }
+
+/* Hero: soft lime glow drifting behind the headline */
+.hero-glow { position: absolute; inset: -20% -10% auto auto; width: 38rem; height: 38rem; border-radius: 9999px; pointer-events: none;
+  background: radial-gradient(closest-side, rgb(154 199 62 / .22), rgb(154 199 62 / 0)); filter: blur(10px); z-index: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-glow { animation: glow-drift 14s ease-in-out infinite alternate; }
+}
+@keyframes glow-drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(-12%, 10%) scale(1.15); } }
+
+/* Logo marquee: two identical rows scroll left forever; pauses on hover or keyboard focus */
+.marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marquee-track { display: flex; width: max-content; gap: 1rem; }
+@media (prefers-reduced-motion: no-preference) {
+  .marquee-track { animation: marquee 38s linear infinite; }
+  .marquee:hover .marquee-track, .marquee:focus-within .marquee-track { animation-play-state: paused; }
+}
+@keyframes marquee { to { transform: translateX(calc(-50% - .5rem)); } }
+@media (prefers-reduced-motion: reduce) {
+  .marquee { mask-image: none; }
+  .marquee-track { flex-wrap: wrap; width: auto; }
+  .marquee-track [data-copy] { display: none; }
+}
